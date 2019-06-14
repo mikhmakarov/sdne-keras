@@ -57,12 +57,12 @@ class SDNE():
         self.graph = graph
         self.N = graph.number_of_nodes()
         self.adj_mat = nx.adjacency_matrix(self.graph).toarray()
-        self.edges = np.array(list(self.graph.edges_iter()))
+        self.edges = np.array(list(self.graph.edges()))
 
         # weights
         # default to 1
         weights = [graph[u][v].get(weight, 1.0)
-                   for u, v in self.graph.edges_iter()]
+                   for u, v in self.graph.edges()]
         self.weights = np.array(weights, dtype=np.float32)[:, None]
 
         if len(self.weights) == self.weights.sum():
@@ -180,7 +180,7 @@ class SDNE():
                 yield ([nodes_a, nodes_b, weights],
                        [neighbors_a, neighbors_b, dummy_output])
 
-    def fit(self, log=False, **kwargs):
+    def fit(self, log=False, batch_size=64, **kwargs):
         """kwargs: keyword arguments passed to `model.fit`"""
         if log:
             callbacks = [keras.callbacks.TensorBoard(
@@ -200,11 +200,15 @@ class SDNE():
         else:
             gen = self.train_data_generator()
 
+        m = self.graph.number_of_edges()
+        steps_per_epoch = math.ceil(m / batch_size)
+
         self.model.fit_generator(
             gen,
             shuffle=True,
             callbacks=callbacks,
             pickle_safe=True,
+            steps_per_epoch=steps_per_epoch,
             **kwargs)
         
     def get_node_embedding(self):

@@ -1,1 +1,1 @@
-from core import SDNE
+from .core import SDNE
