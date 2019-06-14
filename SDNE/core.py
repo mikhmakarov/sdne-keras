@@ -36,19 +36,20 @@ def edge_wise_loss(true_y, embedding_diff):
 
 class SDNE():
     def __init__(self,
-                 graph,
+                 A,
                  encode_dim,
                  weight='weight',
                  encoding_layer_dims=[],
                  beta=2, alpha=2,
                  l2_param=0.01):
-        """graph: nx.Graph
+        """A: adj matrix
         encode_dim: int, length of inner most dim
         beta: beta parameter under Equation 3
         alpha: weight of loss function on self.edges
         """
         self.encode_dim = encode_dim
-
+        
+        graph = nx.from_scipy_sparse_matrix(A)
         ###################
         # GRAPH STUFF
         ###################
